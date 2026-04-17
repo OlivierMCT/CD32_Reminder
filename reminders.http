@@ -1,3 +1,10 @@
 ### GET request to example server
 GET http://localhost:8000/todo
 
+### GET request to example server
+GET http://localhost:8000/todo/1
+
+
+### GET request to example server
+DELETE http://localhost:8000/todo/1
+
