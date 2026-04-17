@@ -1,9 +1,9 @@
+import random
 from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.functions import random
 
-from persistence.entities.catagory_entity import CategoryEntity
+from persistence.entities.category_entity import CategoryEntity
 from persistence.entities.todo_entity import TodoEntity
 
 

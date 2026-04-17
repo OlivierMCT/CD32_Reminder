@@ -2,7 +2,7 @@ from business.contracts.category_service import CategoryService
 from business.models.category import Category, CategoryUpdate, CategoryNew
 from business.models.reminder_error import ReminderError
 from persistence.contracts.category_repository import CategoryRepository
-from persistence.entities.catagory_entity import CategoryEntity
+from persistence.entities.category_entity import CategoryEntity
 
 
 class CategoryServiceImpl(CategoryService):

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from persistence.entities.catagory_entity import CategoryEntity
+from persistence.entities.category_entity import CategoryEntity
 
 
 class CategoryRepository(ABC):

@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from persistence.contracts.category_repository import CategoryRepository
-from persistence.entities.catagory_entity import CategoryEntity
+from persistence.entities.category_entity import CategoryEntity
 
 
 class CategoryRepositoryImpl(CategoryRepository):
