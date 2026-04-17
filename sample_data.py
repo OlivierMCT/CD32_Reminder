@@ -72,7 +72,7 @@ def add_sample_data(session: Session):
             description=d,
             is_done = random.choice([True, False]),
             due_date=datetime.now() + timedelta(days=random.randint(-40, 50)),
-            categories = random.choice(categories),
+            categories = random.choices(categories),
             creation_date=datetime.now()
         ) for d in bucket_list
     ]
