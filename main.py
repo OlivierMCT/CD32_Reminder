@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware import cors
 from fastapi.responses import JSONResponse
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -15,10 +16,14 @@ from persistence.entities.todo_entity import TodoEntity
 from persistence.repositories.category_repository_impl import CategoryRepositoryImpl
 from persistence.repositories.todo_repository_impl import TodoRepositoryImpl
 
-app = FastAPI(title="CD32 Reminder", version="1.0")
+engine_db = create_engine('mysql://root:@localhost:3306/reminders')
+BaseEntity.metadata.create_all(engine_db)
 
-app.include_router(todo_router)
-app.include_router(category_router)
+def seed():
+    session = sessionmaker(autocommit=False, autoflush=False, bind=engine_db)()
+    if session.query(TodoEntity).count() == 0:
+        sample_data.add_sample_data(session)
+seed()
 
 async def reminder_error_handler(request: Request, error: ReminderError) -> JSONResponse:
     status_code = 400
@@ -26,11 +31,6 @@ async def reminder_error_handler(request: Request, error: ReminderError) -> JSON
     elif error.code == 999: status_code = 403
     elif error.code == 222: status_code = 400
     return JSONResponse(status_code=status_code, content=error.message)
-
-app.add_exception_handler(ReminderError, reminder_error_handler)
-
-engine_db = create_engine('mysql://root:@localhost:3306/reminders')
-BaseEntity.metadata.create_all(engine_db)
 
 def _get_todo_service():
     session = sessionmaker(autocommit=False, autoflush=False, bind=engine_db)()
@@ -43,13 +43,23 @@ def _get_category_service() -> CategoryService:
     cat_repo = CategoryRepositoryImpl(session)
     return CategoryServiceImpl(cat_repo)
 
+
+
+
+app = FastAPI(title="CD32 Reminder", version="1.0")
+
+app.include_router(todo_router)
+app.include_router(category_router)
+
+app.add_exception_handler(ReminderError, reminder_error_handler)
 #app.dependency_overrides[get_category_service] = _get_category_service
 app.dependency_overrides[get_todo_service] = _get_todo_service
 
+app.add_middleware(
+    cors.CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET"],
+    allow_headers=["*"],
+    allow_credentials=True,
+)
 
-
-def seed():
-    session = sessionmaker(autocommit=False, autoflush=False, bind=engine_db)()
-    if session.query(TodoEntity).count() == 0:
-        sample_data.add_sample_data(session)
-seed()

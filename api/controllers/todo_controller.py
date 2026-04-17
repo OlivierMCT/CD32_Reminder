@@ -23,6 +23,11 @@ def get_todo(id: int, service: TodoService = Depends(get_todo_service)):
 def delete_todo(id: int, service: TodoService = Depends(get_todo_service)):
     service.remove(id)
 
+@router.patch('/{id}/category')
+def update_todo_categories(id: int, body: dict, service: TodoService = Depends(get_todo_service)):
+    service.add_categories(id, *body['categories'])
+    # noinspection PyTypeChecker
+    return to_dto_from_model(service.find_by_id(id))
 
 def to_dto_from_model(model: Todo) -> TodoDto:
     return TodoDto(

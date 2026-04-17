@@ -8,3 +8,13 @@ GET http://localhost:8000/todo/1
 ### GET request to example server
 DELETE http://localhost:8000/todo/1
 
+###
+PATCH http://localhost:8000/todo/2/category
+Content-Type: application/json
+
+{
+    "categories": [1, 2]
+}
+
+###
+Delete http://localhost:8000/todo/1/category/22

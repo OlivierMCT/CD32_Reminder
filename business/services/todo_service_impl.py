@@ -116,7 +116,9 @@ class TodoServiceImpl(TodoService):
         entity = self._todo_repo.select_by_id(todo_id)
         if entity is None:
             raise ReminderError(666, f"Todo with id {todo_id} does not exist")
-        for category_id in category_ids:
+
+        entity_categories = [c.category_id for c in entity.categories]
+        for category_id in [id for id in category_ids if not id in entity_categories]:
             e = self._category_repo.select_by_id(category_id)
             if e is None:
                 raise ReminderError(666, f"Category with id {category_id} does not exist")
