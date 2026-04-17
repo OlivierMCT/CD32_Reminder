@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from sqlalchemy.orm import sessionmaker
 
 from api.controllers.category_controller import router as category_router
 from api.controllers.todo_controller import router as todo_router
