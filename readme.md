@@ -21,10 +21,11 @@ Packages utilisés :
 - uvicorn : serveur ASGI pour exécuter l'application FastAPI
 - sqlalchemy : ORM pour interagir avec la base de données
 - pytest : framework de test pour Python
+- mysql-connector-python : connecteur pour MySQL
 
 # 🚀 Démarrage de l'application
 ```bash
-unicorn main:app --reload
+uvicorn main:app --reload
 ```
 Urls :
 - http://localhost:8000/docs : documentation interactive de l'API
