@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Any, cast
 
 from bootstrap.database import create_schema, seed_database
-from bootstrap.dependencies import build_category_service, build_statistics_service, build_todo_service
 from bootstrap.error_handlers import reminder_error_handler
 from domain.exceptions.reminder_error import ReminderError
-from presentation.api.routers.category_router import router as category_router, get_category_service
-from presentation.api.routers.statistics_router import router as statistics_router, get_statistics_service
-from presentation.api.routers.todo_router import router as todo_router, get_todo_service
+from features.category.router import router as category_router
+from features.statistics.router import router as statistics_router
+from features.todo.router import router as todo_router
 
 
 def create_app() -> FastAPI:
@@ -21,12 +21,9 @@ def create_app() -> FastAPI:
     app.include_router(statistics_router)
 
     app.add_exception_handler(ReminderError, reminder_error_handler)
-    app.dependency_overrides[get_category_service] = build_category_service
-    app.dependency_overrides[get_todo_service] = build_todo_service
-    app.dependency_overrides[get_statistics_service] = build_statistics_service
 
     app.add_middleware(
-        CORSMiddleware,
+        cast(Any, CORSMiddleware),
         allow_origins=["*"],
         allow_methods=["GET"],
         allow_headers=["*"],

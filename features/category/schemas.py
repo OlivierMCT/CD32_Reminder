@@ -22,4 +22,3 @@ class CategoryPutDto:
     title: str
     color: str
 
-

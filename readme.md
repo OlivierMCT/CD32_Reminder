@@ -28,44 +28,45 @@ Par défaut, l'application utilise SQLite avec le fichier `reminders.db` à la r
 
 Pour surcharger l'URL de connexion, utilisez la variable d'environnement `DATABASE_URL`.
 
-# 🧱 Architecture CLEAN
-- `domain/` : modèles métier et exceptions du domaine
-- `application/` : ports (in/out) et cas d'usage
-- `infrastructure/` : persistance SQLAlchemy (entités, repositories, seed)
-- `presentation/` : routeurs FastAPI et schémas API
-- `bootstrap/` : composition de l'application (DB, dépendances, handlers)
+# 🧱 Architecture Vertical Slices
+- `features/todo/` : endpoints, schemas et logique métier de la fonctionnalité todo
+- `features/category/` : endpoints, schemas et logique métier de la fonctionnalité category
+- `features/statistics/` : endpoints et requêtes statistiques
+- `features/shared/` : ré-export léger des dépendances partagées entre slices
+- `infrastructure/` : engine SQLAlchemy (`db.py`), entités ORM, seed de données
+- `bootstrap/` : création de l'application FastAPI, schema DB, handlers globaux
+- `domain/exceptions/` : exception métier partagée (`ReminderError`)
 - `main.py` : point d'entrée minimal qui expose `app`
 
 ## Diagramme des dependances
 ```mermaid
 flowchart LR
-	P[presentation\napi routers + schemas] --> A[application\nports + use_cases]
-	A --> D[domain\nmodels + exceptions]
-	I[infrastructure\nsqlalchemy entities + repositories + seed] --> A
-	B[bootstrap\napp wiring + DI + DB init] --> P
-	B --> A
+	B[bootstrap] --> FT[features/todo]
+	B --> FC[features/category]
+	B --> FS[features/statistics]
+	FT --> I[infrastructure]
+	FC --> I
+	FS --> I
+	FT --> D[domain/exceptions]
+	FC --> D
 	B --> I
-
-	D -. ne depend de rien .- D
 ```
 
 Regles de dependances:
-- `domain` ne depend d'aucune autre couche
-- `application` depend de `domain` et de ses ports
-- `infrastructure` implemente les ports sortants de `application`
-- `presentation` utilise les ports entrants de `application`
-- `bootstrap` assemble les implementations concretes
+- chaque dossier dans `features/` regroupe son routeur, ses schemas et sa logique
+- une fonctionnalité peut accéder directement à la base via SQLAlchemy si cela sert bien la slice
+- `statistics` illustre ce choix : lecture directe en base, sans service ni repository intermédiaire
+- `bootstrap` assemble uniquement l'application et les composants transverses
 
 ## Conventions de nommage
 - Fichiers Python: `snake_case.py`
 - Classes: `PascalCase`
-- Ports entrants: `application/ports/inbound/<feature>_service.py` avec interface `<Feature>Service`
-- Ports sortants: `application/ports/outbound/<feature>_repository.py` avec interface `<Feature>Repository`
-- Cas d'usage: `application/use_cases/<feature>_service.py` avec implementation `<Feature>ServiceImpl`
-- Repositories SQLAlchemy: `infrastructure/persistence/sqlalchemy/repositories/sqlalchemy_<feature>_repository.py`
-- Routeurs API: `presentation/api/routers/<feature>_router.py`
-- Schemas API: `presentation/api/schemas/<feature>.py` avec suffixes `Dto`, `PostDto`, `PutDto`, `PatchDto`
-- Tests: `tests/<couche>/.../<unit_under_test>_test.py`, classes `Test...`, fonctions `test_...`
+- Une feature vit dans `features/<feature>/`
+- Routeur d'une feature: `features/<feature>/router.py`
+- Schemas d'une feature: `features/<feature>/schemas.py`
+- Logique d'une feature: `features/<feature>/slice.py`
+- Dépendances mutualisées légères: `features/shared/*.py`
+- Tests: `tests/features/<feature>/<feature>_slice_test.py`, classes `Test...`, fonctions `test_...`
 
 # 🚀 Démarrage de l'application
 ```bash

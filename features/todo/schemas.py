@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pydantic.dataclasses import dataclass
 
+
 @dataclass
 class TodoDto:
     id: int
@@ -13,12 +14,12 @@ class TodoDto:
     categories: list[tuple[int, str]]
 
 
-
 @dataclass
 class TodoPostDto:
     desc: str
     due: datetime
     categories: list[int]
+
 
 @dataclass
 class TodoPutDto:
@@ -26,6 +27,8 @@ class TodoPutDto:
     done: bool
     due: datetime
 
+
 @dataclass
 class TodoPatchDto:
     done: bool
+
