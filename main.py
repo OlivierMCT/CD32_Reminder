@@ -1,7 +1,9 @@
+import os
+
 from fastapi import FastAPI, Request
 from fastapi.middleware import cors
 from fastapi.responses import JSONResponse
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
 import sample_data
@@ -16,7 +18,22 @@ from persistence.entities.todo_entity import TodoEntity
 from persistence.repositories.category_repository_impl import CategoryRepositoryImpl
 from persistence.repositories.todo_repository_impl import TodoRepositoryImpl
 
-engine_db = create_engine('mysql://root:@localhost:3306/reminders')
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./reminders.db")
+engine_options = {}
+
+if DATABASE_URL.startswith("sqlite"):
+    # check_same_thread=False allows FastAPI request handlers to share the same DB file safely.
+    engine_options["connect_args"] = {"check_same_thread": False}
+
+engine_db = create_engine(DATABASE_URL, **engine_options)
+
+if DATABASE_URL.startswith("sqlite"):
+    @event.listens_for(engine_db, "connect")
+    def _enable_sqlite_foreign_keys(dbapi_connection, _connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
 BaseEntity.metadata.create_all(engine_db)
 
 def seed():
@@ -42,9 +59,6 @@ def _get_category_service() -> CategoryService:
     session = sessionmaker(autocommit=False, autoflush=False, bind=engine_db)()
     cat_repo = CategoryRepositoryImpl(session)
     return CategoryServiceImpl(cat_repo)
-
-
-
 
 app = FastAPI(title="CD32 Reminder", version="1.0")
 

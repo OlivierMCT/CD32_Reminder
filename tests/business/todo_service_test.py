@@ -20,7 +20,7 @@ class TestRemoveTodo:
         mock_todo_repo = MagicMock(spec=TodoRepository)
         mock_todo_repo.select_by_id.return_value = entity
 
-        service = TodoServiceImpl(mock_todo_repo)
+        service = TodoServiceImpl(mock_todo_repo, None)
 
         # Act
         with patch.object(service, 'to_todo_from_entity') as mock_to_todo_from_entity:
@@ -38,7 +38,7 @@ class TestRemoveTodo:
         todo_id = 9
         mock_todo_repo = MagicMock(spec=TodoRepository)
         mock_todo_repo.select_by_id.return_value = None
-        service = TodoServiceImpl(mock_todo_repo)
+        service = TodoServiceImpl(mock_todo_repo, None)
 
         # -- Act  -----------------------------------------------------
         with pytest.raises(ReminderError) as ex_info:
@@ -62,7 +62,7 @@ class TestRemoveTodo:
         mock_todo_repo = MagicMock(spec=TodoRepository)
         mock_todo_repo.select_by_id.return_value = entity
 
-        service = TodoServiceImpl(mock_todo_repo)
+        service = TodoServiceImpl(mock_todo_repo, None)
 
         # Act
         with patch.object(service, 'to_todo_from_entity') as mock_to_todo_from_entity:

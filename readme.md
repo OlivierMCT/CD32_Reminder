@@ -21,7 +21,12 @@ Packages utilisés :
 - uvicorn : serveur ASGI pour exécuter l'application FastAPI
 - sqlalchemy : ORM pour interagir avec la base de données
 - pytest : framework de test pour Python
-- mysql-connector-python : connecteur pour MySQL
+- sqlite3 : base de données locale (incluse avec Python)
+
+# 💾 Base de données
+Par défaut, l'application utilise SQLite avec le fichier `reminders.db` à la racine du projet.
+
+Pour surcharger l'URL de connexion, utilisez la variable d'environnement `DATABASE_URL`.
 
 # 🚀 Démarrage de l'application
 ```bash
