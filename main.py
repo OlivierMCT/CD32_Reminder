@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
 import sample_data
-from api.controllers.category_controller import router as category_router
+from api.controllers.category_controller import router as category_router, get_category_service
 from api.controllers.todo_controller import router as todo_router, get_todo_service
 from business.contracts.category_service import CategoryService
 from business.models.reminder_error import ReminderError
@@ -66,7 +66,7 @@ app.include_router(todo_router)
 app.include_router(category_router)
 
 app.add_exception_handler(ReminderError, reminder_error_handler)
-#app.dependency_overrides[get_category_service] = _get_category_service
+app.dependency_overrides[get_category_service] = _get_category_service
 app.dependency_overrides[get_todo_service] = _get_todo_service
 
 app.add_middleware(

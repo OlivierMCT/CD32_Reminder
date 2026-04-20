@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends
-from fastapi.responses import Response
+from fastapi import APIRouter, Depends, Response
 
-from api.dtos.todo import TodoDto
+from api.dtos.todo import TodoDto, TodoPostDto, TodoPutDto, TodoPatchDto
 from business.contracts.todo_service import TodoService
-from business.models.todo import Todo
+from business.models.todo import Todo, TodoNew, TodoUpdate
 
 router = APIRouter(prefix='/todo', tags=['todo'])
 
@@ -17,6 +16,25 @@ def get_all_todos(service: TodoService = Depends(get_todo_service)) -> list[Todo
 @router.get('/{id}', response_model=TodoDto)
 def get_todo(id: int, service: TodoService = Depends(get_todo_service)):
     model = service.find_by_id(id)
+    return to_dto_from_model(model) if model else Response(status_code=404, content='not found')
+
+@router.post('/', status_code=201, response_model=TodoDto)
+def post_todo(dto: TodoPostDto, response: Response, service: TodoService = Depends(get_todo_service)) -> TodoDto:
+    model = service.save_new(to_model_from_postdto(dto))
+    service.add_categories(model.id, *dto.categories)
+    response.headers['Location'] = f'/todo/{model.id}'
+    return to_dto_from_model(model)
+
+@router.put('/{id}', response_model=TodoDto)
+def put_todo(id: int, dto: TodoPutDto, service: TodoService = Depends(get_todo_service)) -> TodoDto:
+    model = service.save_update(to_model_from_putdto(id, dto))
+    return to_dto_from_model(model)
+
+@router.patch('/{id}', response_model=TodoDto)
+def put_todo(id: int, dto: TodoPatchDto, service: TodoService = Depends(get_todo_service)):
+    model = service.find_by_id(id)
+    if model and model.is_done != dto.done:
+        model = service.toggle(id)
     return to_dto_from_model(model) if model else Response(status_code=404, content='not found')
 
 @router.delete('/{id}', status_code=204)
@@ -38,4 +56,19 @@ def to_dto_from_model(model: Todo) -> TodoDto:
         deletable=model.is_deletable,
         status=model.status,
         categories=[(c.id, c.title) for c in model.categories]
+    )
+
+def to_model_from_postdto(dto: TodoPostDto) -> TodoNew:
+    return TodoNew(
+        description=dto.desc,
+        due_date=dto.due,
+    )
+
+
+def to_model_from_putdto(id: int, dto: TodoPutDto) -> TodoUpdate:
+    return TodoUpdate(
+        id=id,
+        description=dto.desc,
+        is_done=dto.done,
+        due_date=dto.due,
     )
