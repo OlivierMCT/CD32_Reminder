@@ -10,8 +10,9 @@ def get_todo_service() -> TodoService:
     raise NotImplementedError("This is a placeholder for the actual dependency injection of TodoService")
 
 @router.get('/')
-def get_all_todos(service: TodoService = Depends(get_todo_service)) -> list[TodoDto]:
-    return [to_dto_from_model(m) for m in service.find_all()]
+def get_all_todos(search: str | None, service: TodoService = Depends(get_todo_service)) -> list[TodoDto]:
+    models = service.search(search) if search else service.find_all()
+    return [to_dto_from_model(m) for m in models]
 
 @router.get('/{id}', response_model=TodoDto)
 def get_todo(id: int, service: TodoService = Depends(get_todo_service)):
